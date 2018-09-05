@@ -1,6 +1,6 @@
 Requirements
 ------------
-1- Create IAM Users & Groups.
+1- Create IAM Users & Groups via AWS Management Console.
 
 2- Create the Ansible EC2 instance via AWS Management Console .
 
@@ -10,7 +10,7 @@ Requirements
 
 4- Create the main yaml script called site.yml.
 
-5- Create  the playbook rolei called  provision-monitor-agent.
+5- Create a playbook role called  provision-monitor-agent.
 
 6- Copy "my-monitoring-agent.sh" script (which contains the cloud-init directive) under /etc/ansible/roles/provision-monitor-agent/templates/.
 7- Add the hostgroup [monitoragents] under /etc/ansible/hosts.
