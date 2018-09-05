@@ -1,0 +1,55 @@
+---
+# tasks file for provision-monitor-agent
+- name: Create a security group
+  ec2_group:
+      name: "{{ security_group }}"
+      description: "Open ssh and monitor agent ports"
+      region: "{{ region }}"
+      rules:
+        - proto: tcp
+          from_port: 22
+          to_port: 22
+          cidr_ip: 0.0.0.0/0
+        - proto: tcp
+          from_port: 80
+          to_port: 80
+          cidr_ip: 0.0.0.0/0
+      
+      aws_access_key: AKIAJ3N47Z2TD4VWUIXA
+      aws_secret_key: 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
+
+  register: mon_agent_firewall
+
+
+- name: provision ec2 ubuntu server
+  ec2:
+    group: "{{ security_group }}"
+    instance_type: "{{ instance_type}}"
+    image: "{{ image }}"
+    wait: yes
+    region: "{{ region }}"
+    key_name: "{{ keypair }}"
+    exact_count: "{{ mon_agent_instance_count }}"
+    count_tag: { "Name": "Monitoring-Agent" }
+    instance_tags: {
+      "Name": "Monitoring-Agent",
+    }
+    aws_access_key: AKIAJ3N47Z2TD4VWUIXA
+    aws_secret_key: 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
+    user_data: "{{ lookup('file', '/etc/ansible/roles/provision-monitor-agent/templates/my-monitoring-agent.sh') }}"
+  register: mon_agent_ec2
+
+- name: Check if we can ssh to the instance
+  wait_for:
+    host: "{{ item.private_ip }}"
+    port: 22
+    state: started
+  with_items: "{{ mon_agent_ec2.instances }}"
+
+- name: Add instance to local inventory file
+  lineinfile:
+    dest: "/etc/ansible/hosts"
+    regexp: "{{ item.private_ip }}"
+    insertafter: '[monitoragents]'
+    line: "{{ item.private_ip }}"
+  with_items: "{{ mon_agent_ec2.instances }}"

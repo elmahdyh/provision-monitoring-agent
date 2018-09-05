@@ -1,0 +1,14 @@
+## site.yml
+---
+- name: Provision Monitoring Agent Instance and Create Its Security Group
+  hosts: localhost
+  gather_facts: no
+  vars:
+      instance_type: t2.micro
+      security_group: mon-agents-sg # Change the security group name here
+      image: ami-0552e3455b9bc8d50
+      keypair: AWSAnsibleRootPub # This is one of my keys that i already have in AWS
+      region: us-east-2 # Change the Region when needed
+      mon_agent_instance_count: 1
+  roles:
+    - provision-monitor-agent
